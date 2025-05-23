@@ -228,7 +228,7 @@ export default function Home() {
           }
           {
             !data.forSale && 
-            <div className="text-rose-500 w-3/4 px-2 border-2 z-20 text-2xl font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-45">Not For Sale</div>
+            <div className="text-rose-500 w-min-2/3 w-max-[100px] px-2 border-2 z-20 text-2xl font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-45">Not For Sale</div>
           }
           <h5 className="font-semibold text-xl">{data.name}</h5>
           <div className="text-sm my-1">
@@ -324,19 +324,19 @@ export default function Home() {
 
   return (
     <>
-      <div className="m-3 pb-2 border-b-1 flex justify-between">
-        <h1 className="text-3xl font-bold">Real Asset Marketplace</h1>
+      <div className="m-3 pb-2 border-b-1 flex flex-col lg:flex-row justify-between">
+        <h1 className="text-3xl font-bold mb-2">Real Asset Marketplace</h1>
         {
         isWalletConnect ? 
-        <div className="flex gap-2 items-center">
-          <p className="font-semibold">Address: {currentAccount}</p>
+        <div className="flex flex-col lg:flex-row gap-2 lg:justify-end lg:items-center w-full">
+          <p className="font-semibold overflow-hidden">Address: {currentAccount}</p>
           <button onClick={openModalMintHandler} className="text-sm px-1 bg-green-400 py-0.5 border rounded-md hover:bg-green-500 hover:cursor-pointer">Mint Asset</button>
         </div>
         :
         <button onClick={connectWallet} className="border text-sm font-semibold rounded-lg duration-100 bg-slate-300 p-1 hover:bg-slate-400 hover:cursor-pointer">Connect Wallet</button>
         }
       </div>
-      <div className={`m-3 p-1 ${ nftAssets.length !==0 ? "grid grid-cols-4 gap-3" : "flex justify-center"}`}>
+      <div className={`m-3 p-1 ${ nftAssets.length !==0 ? "grid grid-cols-2 md:grid-cols-4 gap-3" : "flex justify-center"}`}>
         { nftAssets.length !== 0 ?
           nftAssets.map((d, i) => {
             return <Card key={i} data={d}/>

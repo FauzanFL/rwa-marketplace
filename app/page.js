@@ -1,15 +1,17 @@
 "use client"
 import { useEffect, useState } from "react";
 import contractAbi from "../utils/abi/RealAssetNFT.json";
-import { ethers } from "ethers";
+import { ethers, getBigInt } from "ethers";
 
 // Change this to adjust the contract address that have been deployed before
-const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const CONTRACT_ADDRESS = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
 
 export default function Home() {
   const [currentAccount, setCurrentAccount] = useState(null);
   const [contract, setContract] = useState(null);
   const [isMintModalOpen, setIsMintModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState({})
   const [isWalletConnect, setIsWalletConnect] = useState(false);
   const [nftAssets, setNftAssets] = useState([]);
   const [dataAsset, setDataAsset] = useState({
@@ -133,12 +135,59 @@ export default function Home() {
     await getAllAsset();
   }
 
-  const openModalHandler = () => {
+  // function checkData(obj1, obj2) {
+  //   const keys1 = Object.keys(obj1);
+  //   const keys2 = Object.keys(obj2);
+
+  //   if (keys1.length !== keys2.length) return false;
+
+  //   return keys1.every(key => obj2.hasOwnProperty(key) && obj1[key] === obj2[key]);
+  // }
+
+  const saveAsset = async (event) => {
+    event.preventDefault();
+    
+    if (selectedAsset.name === "") {
+      console.log("Name is required");
+      return
+    } else if (selectedAsset.description === "") {
+      console.log("Description is required");
+      return
+    } else if (selectedAsset.price <= 0) {
+      console.log("Price cannot less then or equal 0");
+      return
+    }
+
+    if (!contract) {
+      console.log("No contract");
+      return
+    }
+    
+    const updated = await contract.updateListing(selectedAsset.tokendId, selectedAsset.name, selectedAsset.description, ethers.parseEther(selectedAsset.price.toString()), selectedAsset.forSale);
+    console.log("Update successfully");
+
+    await updated.wait();
+
+    await getAllAsset();
+    closeModalEditHandler();
+  }
+
+  const openModalMintHandler = () => {
     setIsMintModalOpen(true);
   }
 
-  const closeModalHandler = () => {
+  const closeModalMintHandler = () => {
     setIsMintModalOpen(false);
+  }
+
+  const openModalEditHandler = (data) => {
+    setSelectedAsset({...data});
+    setIsEditModalOpen(true);
+  }
+
+  const closeModalEditHandler = () => {
+    setIsEditModalOpen(false);
+    setSelectedAsset({});
   }
 
   const inputHandler = (target) => {
@@ -154,11 +203,33 @@ export default function Home() {
     setDataAsset(dataTemp);
   }
 
+  const inputEditHandler = (target) => {
+    const dataTemp = selectedAsset;
+    if (target.name === "name-edit") {
+      dataTemp.name = target.value;
+    } else if (target.name === "description-edit") {
+      dataTemp.description = target.value;
+    } else if (target.name === "price-edit") {
+      dataTemp.price = parseFloat(target.value);
+    } else if (target.name === "forSale-edit") {
+      dataTemp.forSale = target.checked;
+    }
+    
+    setSelectedAsset(dataTemp);
+  }
+
   const Card = ({data}) => {
     return (
       <>
         <div className="relative p-3 border rounded-md wrap-break-word bg-slate-100 shadow-md">
-          <button className="absolute text-xs top-2 right-2 underline hover:cursor-pointer hover:font-semibold hover:text-gray-600">Edit</button>
+          {
+            data.seller === currentAccount &&
+            <button onClick={() => openModalEditHandler(data)} className="absolute text-xs top-2 right-2 underline hover:cursor-pointer hover:font-semibold hover:text-gray-600">Edit</button>
+          }
+          {
+            !data.forSale && 
+            <div className="text-rose-500 w-3/4 px-2 border-2 z-20 text-2xl font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-45">Not For Sale</div>
+          }
           <h5 className="font-semibold text-xl">{data.name}</h5>
           <div className="text-sm my-1">
             <p>Description: </p>
@@ -166,12 +237,7 @@ export default function Home() {
           </div>
           <p className="text-sm">Price: {data.price} ETH</p>
           <p className="text-sm">Seller: <span className="font-medium">{data.seller}</span></p>
-          { data.forSale === false && data.seller !== currentAccount ?
-            <div className="flex justify-center mt-2">
-              <button className="text-sm px-1 bg-gray-400 py-0.5 border rounded-md">Not For Sale</button>
-            </div>
-            :
-            currentAccount !== null && data.seller !== currentAccount &&
+          { data.forSale && currentAccount !== null && data.seller !== currentAccount &&
             <div className="flex justify-center mt-2">
               <button onClick={() => buyAsset(data.tokendId)} className="text-sm px-1 bg-amber-500 py-0.5 border rounded-md hover:bg-amber-600 hover:cursor-pointer">Buy</button>
             </div>
@@ -184,10 +250,10 @@ export default function Home() {
   const ModalMint = () => {
     return (
       <>
-        <div onClick={closeModalHandler} className="fixed flex justify-center items-center right-0 left-0 top-0 bottom-0 bg-[rgba(31,41,55,0.4)]">
+        <div onClick={closeModalMintHandler} className="fixed flex justify-center items-center right-0 left-0 top-0 bottom-0 bg-[rgba(31,41,55,0.4)]">
           <div onClick={(event) => event.stopPropagation()} className="fixed bg-white opacity-100 p-5 rounded-md">
             <h3 className="font-medium text-2xl">Mint Asset</h3>
-            <button onClick={closeModalHandler} className="absolute border font-bold text-gray-600 rounded-md px-1.5 right-1.5 top-1.5 hover:cursor-pointer hover:text-gray-500">X</button>
+            <button onClick={closeModalMintHandler} className="absolute border font-bold text-gray-600 rounded-md px-1.5 right-1.5 top-1.5 hover:cursor-pointer hover:text-gray-500">X</button>
             <form onSubmit={mintAsset} className="mt-3">
               <div className="flex flex-col my-1">
                 <label className="mb-1">Name</label>
@@ -214,6 +280,43 @@ export default function Home() {
     )
   }
 
+  const ModalEdit = () => {
+    return (
+      <>
+        <div onClick={closeModalEditHandler} className="fixed flex justify-center items-center right-0 left-0 top-0 bottom-0 bg-[rgba(31,41,55,0.4)]">
+          <div onClick={(event) => event.stopPropagation()} className="fixed bg-white opacity-100 p-5 rounded-md">
+            <h3 className="font-medium text-2xl">Edit Asset</h3>
+            <button onClick={closeModalEditHandler} className="absolute border font-bold text-gray-600 rounded-md px-1.5 right-1.5 top-1.5 hover:cursor-pointer hover:text-gray-500">X</button>
+            <form onSubmit={saveAsset} className="mt-3">
+              <div className="flex flex-col my-1">
+                <label className="mb-1">Name</label>
+                <input defaultValue={selectedAsset.name} onChange={({target}) => inputEditHandler(target)} className="outline outline-gray-400 focus:outline-2 rounded-sm p-1" name="name-edit" type="text"/>
+              </div>
+              <div className="flex flex-col my-1">
+                <label className="mb-1">Description</label>
+                <input defaultValue={selectedAsset.description} onChange={({target}) => inputEditHandler(target)} className="outline outline-gray-400 focus:outline-2 rounded-sm p-1" name="description-edit" type="text"/>
+              </div>
+              <div className="flex flex-col my-1">
+                <label className="mb-1">Price</label>
+                <div className="flex justify-between items-center">
+                  <input defaultValue={selectedAsset.price} onChange={({target}) => inputEditHandler(target)} className="outline outline-gray-400 focus:outline-2 rounded-sm p-1" name="price-edit" type="number" step="any"/>
+                  <span className="text-gray-500 mx-1">ETH</span>
+                </div>
+              </div>
+              <div className="flex items-center my-1">
+                <input onChange={({target}) => inputEditHandler(target)} type="checkbox" name="forSale-edit" className="mr-1" defaultChecked={selectedAsset.forSale}/>
+                <span>For Sale</span>
+              </div>
+              <div className="mt-2 flex justify-center">
+                <button className="shadow-sm px-1.5 rounded-sm bg-yellow-400 border hover:cursor-pointer hover:bg-yellow-500" type="submit">Save</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </>
+    )
+  }
+
   useEffect(() => {
     checkWalletConnection();
     getAllAsset();
@@ -227,7 +330,7 @@ export default function Home() {
         isWalletConnect ? 
         <div className="flex gap-2 items-center">
           <p className="font-semibold">Address: {currentAccount}</p>
-          <button onClick={openModalHandler} className="text-sm px-1 bg-green-400 py-0.5 border rounded-md hover:bg-green-500 hover:cursor-pointer">Mint Asset</button>
+          <button onClick={openModalMintHandler} className="text-sm px-1 bg-green-400 py-0.5 border rounded-md hover:bg-green-500 hover:cursor-pointer">Mint Asset</button>
         </div>
         :
         <button onClick={connectWallet} className="border text-sm font-semibold rounded-lg duration-100 bg-slate-300 p-1 hover:bg-slate-400 hover:cursor-pointer">Connect Wallet</button>
@@ -245,6 +348,7 @@ export default function Home() {
         }
       </div>
       { isMintModalOpen && <ModalMint/> }
+      { isEditModalOpen && <ModalEdit/> }
     </>
   );
 }

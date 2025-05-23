@@ -32,9 +32,8 @@ export default function Home() {
       const total = await nftContract.totalMinted();
       const assets = [];
 
-      for (let i = 1; i < Number(total); i++) {
+      for (let i = 1; i <= Number(total); i++) {
         const asset = await nftContract.assets(i);
-
         assets.push({
           tokendId: i,
           name: asset.name,
@@ -73,7 +72,7 @@ export default function Home() {
 
     const accounts = await window.ethereum.request({method: "eth_requestAccounts"});
     if (accounts.length !== 0) {
-      setCurrentAccount(accounts[0]);
+      setCurrentAccount(ethers.getAddress(accounts[0]));
       setIsWalletConnect(true);
 
       const provider = new ethers.BrowserProvider(window.ethereum);
@@ -158,18 +157,21 @@ export default function Home() {
   const Card = ({data}) => {
     return (
       <>
-        <div className="p-3 border rounded-md wrap-break-word">
+        <div className="relative p-3 border rounded-md wrap-break-word bg-slate-100 shadow-md">
+          <button className="absolute text-xs top-2 right-2 underline hover:cursor-pointer hover:font-semibold hover:text-gray-600">Edit</button>
           <h5 className="font-semibold text-xl">{data.name}</h5>
-          <p className="text-sm">{data.description}</p>
+          <div className="text-sm my-1">
+            <p>Description: </p>
+            <p className="text-xs">{data.description}</p>
+          </div>
           <p className="text-sm">Price: {data.price} ETH</p>
           <p className="text-sm">Seller: <span className="font-medium">{data.seller}</span></p>
-          { data.forSale === false ?
+          { data.forSale === false && data.seller !== currentAccount ?
             <div className="flex justify-center mt-2">
               <button className="text-sm px-1 bg-gray-400 py-0.5 border rounded-md">Not For Sale</button>
             </div>
             :
             currentAccount !== null && data.seller !== currentAccount &&
-            // currentAccount !== null ?
             <div className="flex justify-center mt-2">
               <button onClick={() => buyAsset(data.tokendId)} className="text-sm px-1 bg-amber-500 py-0.5 border rounded-md hover:bg-amber-600 hover:cursor-pointer">Buy</button>
             </div>

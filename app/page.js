@@ -31,22 +31,18 @@ export default function Home() {
         nftContract = contract
       }
 
-      const total = await nftContract.totalMinted();
-      const assets = [];
+      const assets = await nftContract.getAllAssets();
 
-      for (let i = 1; i <= Number(total); i++) {
-        const asset = await nftContract.assets(i);
-        assets.push({
-          tokendId: i,
-          name: asset.name,
-          description: asset.description,
-          price: ethers.formatEther(asset.price),
-          seller: asset.seller,
-          forSale: asset.forSale
-        }) 
-      }
+      const assetsResult = assets.map((asset) => ({
+        tokendId: asset.tokenId.toString(),
+        name: asset.name,
+        description: asset.description,
+        price: ethers.formatEther(asset.price),
+        seller: asset.seller,
+        forSale: asset.forSale
+      }));
 
-      setNftAssets(assets);
+      setNftAssets(assetsResult);
     } catch (err) {
       console.error("Error:", err);
     }
@@ -105,7 +101,6 @@ export default function Home() {
 
     const tx = await contract.mintAsset(dataAsset.name, dataAsset.description, ethers.parseEther(dataAsset.price.toString()))
     await tx.wait();
-    console.log(tx);
     console.log("Asset minted!");
 
     await getAllAsset();
@@ -172,6 +167,21 @@ export default function Home() {
     closeModalEditHandler();
   }
 
+  const burnAsset = async (tokenId) => {
+    if(confirm("Are you sure to burn?")) {
+      if (!contract) {
+        console.log("No contract");
+        return
+      }
+
+      const burnt = await contract.burnAsset(tokenId);
+      console.log("Asset burnt!");
+
+      await burnt.wait();
+      await getAllAsset();
+    } 
+  }
+
   const openModalMintHandler = () => {
     setIsMintModalOpen(true);
   }
@@ -224,7 +234,10 @@ export default function Home() {
         <div className="relative p-3 border rounded-md wrap-break-word bg-slate-100 shadow-md">
           {
             data.seller === currentAccount &&
-            <button onClick={() => openModalEditHandler(data)} className="absolute text-xs top-2 right-2 underline hover:cursor-pointer hover:font-semibold hover:text-gray-600">Edit</button>
+            <div className="absolute text-xs top-2 right-2">
+              <button onClick={() => burnAsset(data.tokendId)} className="mr-1 underline text-red-600 hover:cursor-pointer hover:font-semibold hover:text-red-700">Burn</button>
+              <button onClick={() => openModalEditHandler(data)} className="underline hover:cursor-pointer hover:font-semibold hover:text-gray-600">Edit</button>
+            </div>
           }
           {
             !data.forSale && 

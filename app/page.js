@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import contractAbi from "../utils/abi/RealAssetNFT.json";
 import { ethers, getBigInt } from "ethers";
+import Alert from "./Alert";
 
 // Change this to adjust the contract address that have been deployed before
 const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
@@ -15,6 +16,9 @@ export default function Home() {
   const [dataEdit, setDataEdit] = useState({});
   const [isWalletConnect, setIsWalletConnect] = useState(false);
   const [nftAssets, setNftAssets] = useState([]);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertType, setAlertType] = useState("success");
+  const [message, setMessage] = useState("Success!");
   const [dataAsset, setDataAsset] = useState({
     name: "",
     description: "",
@@ -85,13 +89,19 @@ export default function Home() {
     event.preventDefault();
 
     if (dataAsset.name === "") {
+      openAlert("Name is required", "warning");
       console.log("Name is required");
+      closeAlert();
       return
     } else if (dataAsset.description === "") {
+      openAlert("Description is required", "warning");
       console.log("Description is required");
+      closeAlert();
       return
     } else if (dataAsset.price <= 0) {
+      openAlert("Price cannot less then or equal 0", "warning");
       console.log("Price cannot less then or equal 0");
+      closeAlert();
       return
     }
 
@@ -102,7 +112,9 @@ export default function Home() {
 
     const tx = await contract.mintAsset(dataAsset.name, dataAsset.description, ethers.parseEther(dataAsset.price.toString()))
     await tx.wait();
+    openAlert("Asset minted!");
     console.log("Asset minted!");
+    closeAlert();
 
     await getAllAsset();
 
@@ -126,12 +138,14 @@ export default function Home() {
     });
 
     await tx.wait();
-    console.log("NFT bought successfully!")
+    openAlert("NFT bought successfully!");
+    console.log("NFT bought successfully!");
+    closeAlert();
 
     await getAllAsset();
   }
 
-  function checkData(obj1, obj2) {
+  const checkData = (obj1, obj2) => {
     const keys1 = Object.keys(obj1);
     const keys2 = Object.keys(obj2);
 
@@ -140,20 +154,42 @@ export default function Home() {
     return keys1.every(key => obj2.hasOwnProperty(key) && obj1[key] === obj2[key]);``
   }
 
+  const openAlert = (message, type) => {
+    setMessage(message);
+    setAlertType(type);
+    setShowAlert(true);
+  }
+
+  const closeAlert = () => {
+    setTimeout(() => {
+      setShowAlert(false);
+      setMessage("");
+      setAlertType("");
+    }, 3000);
+  }
+
   const saveAsset = async (event) => {
     event.preventDefault();
     
     if (checkData(dataEdit, selectedAsset)) {
+      openAlert("No data changed detected", "warning");
       console.log("No data changed detected");
+      closeAlert();
       return
     } else if (dataEdit.name === "") {
+      openAlert("Name is required", "warning");
       console.log("Name is required");
+      closeAlert();
       return
     } else if (dataEdit.description === "") {
+      openAlert("Description is required", "warning");
       console.log("Description is required");
+      closeAlert();
       return
     } else if (dataEdit.price <= 0) {
+      openAlert("Price cannot less then or equal 0", "warning");
       console.log("Price cannot less then or equal 0");
+      closeAlert();
       return
     }
 
@@ -164,6 +200,8 @@ export default function Home() {
     
     const updated = await contract.updateListing(dataEdit.tokendId, dataEdit.name, dataEdit.description, ethers.parseEther(dataEdit.price.toString()), dataEdit.forSale);
     console.log("Update successfully");
+    openAlert("Asset updated successfully!", "success");
+    closeAlert();
 
     await updated.wait();
 
@@ -179,7 +217,9 @@ export default function Home() {
       }
 
       const burnt = await contract.burnAsset(tokenId);
+      openAlert("Asset burnt!", "success");
       console.log("Asset burnt!");
+      closeAlert();
 
       await burnt.wait();
       await getAllAsset();
@@ -366,6 +406,7 @@ export default function Home() {
           </div>
         }
       </div>
+      {showAlert && <Alert type={alertType} message={message} onClose={closeAlert}/>}
       { isMintModalOpen && <ModalMint/> }
       { isEditModalOpen && <ModalEdit/> }
     </>

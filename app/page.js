@@ -4,14 +4,15 @@ import contractAbi from "../utils/abi/RealAssetNFT.json";
 import { ethers, getBigInt } from "ethers";
 
 // Change this to adjust the contract address that have been deployed before
-const CONTRACT_ADDRESS = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 export default function Home() {
   const [currentAccount, setCurrentAccount] = useState(null);
   const [contract, setContract] = useState(null);
   const [isMintModalOpen, setIsMintModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState({})
+  const [selectedAsset, setSelectedAsset] = useState({});
+  const [dataEdit, setDataEdit] = useState({});
   const [isWalletConnect, setIsWalletConnect] = useState(false);
   const [nftAssets, setNftAssets] = useState([]);
   const [dataAsset, setDataAsset] = useState({
@@ -130,25 +131,28 @@ export default function Home() {
     await getAllAsset();
   }
 
-  // function checkData(obj1, obj2) {
-  //   const keys1 = Object.keys(obj1);
-  //   const keys2 = Object.keys(obj2);
+  function checkData(obj1, obj2) {
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
 
-  //   if (keys1.length !== keys2.length) return false;
+    if (keys1.length !== keys2.length) return false;
 
-  //   return keys1.every(key => obj2.hasOwnProperty(key) && obj1[key] === obj2[key]);
-  // }
+    return keys1.every(key => obj2.hasOwnProperty(key) && obj1[key] === obj2[key]);``
+  }
 
   const saveAsset = async (event) => {
     event.preventDefault();
     
-    if (selectedAsset.name === "") {
+    if (checkData(dataEdit, selectedAsset)) {
+      console.log("No data changed detected");
+      return
+    } else if (dataEdit.name === "") {
       console.log("Name is required");
       return
-    } else if (selectedAsset.description === "") {
+    } else if (dataEdit.description === "") {
       console.log("Description is required");
       return
-    } else if (selectedAsset.price <= 0) {
+    } else if (dataEdit.price <= 0) {
       console.log("Price cannot less then or equal 0");
       return
     }
@@ -158,7 +162,7 @@ export default function Home() {
       return
     }
     
-    const updated = await contract.updateListing(selectedAsset.tokendId, selectedAsset.name, selectedAsset.description, ethers.parseEther(selectedAsset.price.toString()), selectedAsset.forSale);
+    const updated = await contract.updateListing(dataEdit.tokendId, dataEdit.name, dataEdit.description, ethers.parseEther(dataEdit.price.toString()), dataEdit.forSale);
     console.log("Update successfully");
 
     await updated.wait();
@@ -192,12 +196,14 @@ export default function Home() {
 
   const openModalEditHandler = (data) => {
     setSelectedAsset({...data});
+    setDataEdit({...data});
     setIsEditModalOpen(true);
   }
 
   const closeModalEditHandler = () => {
     setIsEditModalOpen(false);
     setSelectedAsset({});
+    setDataEdit({});
   }
 
   const inputHandler = (target) => {
@@ -214,7 +220,7 @@ export default function Home() {
   }
 
   const inputEditHandler = (target) => {
-    const dataTemp = selectedAsset;
+    const dataTemp = dataEdit
     if (target.name === "name-edit") {
       dataTemp.name = target.value;
     } else if (target.name === "description-edit") {
@@ -225,7 +231,7 @@ export default function Home() {
       dataTemp.forSale = target.checked;
     }
     
-    setSelectedAsset(dataTemp);
+    setDataEdit(dataTemp);
   }
 
   const Card = ({data}) => {
@@ -303,16 +309,16 @@ export default function Home() {
             <form onSubmit={saveAsset} className="mt-3">
               <div className="flex flex-col my-1">
                 <label className="mb-1">Name</label>
-                <input defaultValue={selectedAsset.name} onChange={({target}) => inputEditHandler(target)} className="outline outline-gray-400 focus:outline-2 rounded-sm p-1" name="name-edit" type="text"/>
+                <input defaultValue={dataEdit.name} onChange={({target}) => inputEditHandler(target)} className="outline outline-gray-400 focus:outline-2 rounded-sm p-1" name="name-edit" type="text"/>
               </div>
               <div className="flex flex-col my-1">
                 <label className="mb-1">Description</label>
-                <input defaultValue={selectedAsset.description} onChange={({target}) => inputEditHandler(target)} className="outline outline-gray-400 focus:outline-2 rounded-sm p-1" name="description-edit" type="text"/>
+                <input defaultValue={dataEdit.description} onChange={({target}) => inputEditHandler(target)} className="outline outline-gray-400 focus:outline-2 rounded-sm p-1" name="description-edit" type="text"/>
               </div>
               <div className="flex flex-col my-1">
                 <label className="mb-1">Price</label>
                 <div className="flex justify-between items-center">
-                  <input defaultValue={selectedAsset.price} onChange={({target}) => inputEditHandler(target)} className="outline outline-gray-400 focus:outline-2 rounded-sm p-1" name="price-edit" type="number" step="any"/>
+                  <input defaultValue={dataEdit.price} onChange={({target}) => inputEditHandler(target)} className="outline outline-gray-400 focus:outline-2 rounded-sm p-1" name="price-edit" type="number" step="any"/>
                   <span className="text-gray-500 mx-1">ETH</span>
                 </div>
               </div>

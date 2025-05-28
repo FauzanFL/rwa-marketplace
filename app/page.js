@@ -313,13 +313,19 @@ export default function Home() {
             !data.forSale && 
             <div className="text-rose-500 w-min-2/3 w-max-[100px] px-2 border-2 z-10 text-2xl font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-45">Not For Sale</div>
           }
-          <h5 className="font-semibold text-xl">{data.name}</h5>
+          <h5 className="font-bold text-xl">{data.name}</h5>
           <div className="text-sm my-1">
-            <p>Description: </p>
+            <p className="font-medium">Description: </p>
             <p className="text-xs">{data.description}</p>
           </div>
-          <p className="text-sm">Price: {data.price} ETH</p>
-          <p className="text-sm">Seller: <span className="font-medium">{data.seller}</span></p>
+          <div>
+            <p className="font-medium">Price: </p>
+            <p>{data.price} ETH</p>
+          </div>
+          <div>
+            <p className="font-medium">Seller: </p>
+            <p>{data.seller}</p>
+          </div>
           { data.forSale && currentAccount !== null && data.seller !== currentAccount &&
             <div className="flex justify-center mt-2">
               <button onClick={() => buyAsset(data.tokendId)} className="text-sm px-2 bg-amber-500 py-1 text-white shadow-md rounded-md hover:bg-amber-400 hover:cursor-pointer">Buy</button>

@@ -301,7 +301,7 @@ export default function Home() {
   const Card = ({data}) => {
     return (
       <>
-        <div className="relative p-3 border rounded-md wrap-break-word bg-slate-100 shadow-md">
+        <div className="relative p-3 border border-slate-400 rounded-md wrap-break-word bg-slate-100 shadow-lg">
           {
             data.seller === currentAccount &&
             <div className="absolute text-xs top-2 right-2">
@@ -322,7 +322,7 @@ export default function Home() {
           <p className="text-sm">Seller: <span className="font-medium">{data.seller}</span></p>
           { data.forSale && currentAccount !== null && data.seller !== currentAccount &&
             <div className="flex justify-center mt-2">
-              <button onClick={() => buyAsset(data.tokendId)} className="text-sm px-1 bg-amber-500 py-0.5 border rounded-md hover:bg-amber-600 hover:cursor-pointer">Buy</button>
+              <button onClick={() => buyAsset(data.tokendId)} className="text-sm px-2 bg-amber-500 py-1 text-white shadow-md rounded-md hover:bg-amber-400 hover:cursor-pointer">Buy</button>
             </div>
           }
         </div>
@@ -354,7 +354,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-2 flex justify-center">
-                <button className="shadow-sm px-1.5 rounded-sm bg-blue-500 text-white hover:cursor-pointer hover:bg-blue-600" type="submit">Mint</button>
+                <button className="shadow-md px-2 py-0.5 rounded-sm bg-sky-500 text-white hover:cursor-pointer hover:bg-sky-400" type="submit">Mint</button>
               </div>
             </form>
           </div>
@@ -391,7 +391,7 @@ export default function Home() {
                 <span>For Sale</span>
               </div>
               <div className="mt-2 flex justify-center">
-                <button className="shadow-sm px-1.5 rounded-sm bg-yellow-400 border hover:cursor-pointer hover:bg-yellow-500" type="submit">Save</button>
+                <button className="shadow-md text-white px-2 py-0.5 rounded-sm bg-sky-500 hover:cursor-pointer hover:bg-sky-400" type="submit">Save</button>
               </div>
             </form>
           </div>
@@ -408,15 +408,15 @@ export default function Home() {
   return (
     <>
       <div className="m-3 pb-2 border-b-1 flex flex-col lg:flex-row justify-between">
-        <h1 className="text-3xl font-bold mb-2">Real Asset Marketplace</h1>
+        <h1 className="text-3xl font-bold mb-2">NFT Asset Marketplace</h1>
         {
         isWalletConnect ? 
         <div className="flex flex-col lg:flex-row gap-2 lg:justify-end lg:items-center w-full">
           <p className="font-semibold overflow-hidden">Address: {currentAccount}</p>
-          <button onClick={openModalMintHandler} className="text-sm px-1 bg-green-400 py-0.5 border rounded-md hover:bg-green-500 hover:cursor-pointer">Mint Asset</button>
+          <button onClick={openModalMintHandler} className="text-sm px-3 bg-green-500 py-2 shadow-md text-white rounded-md hover:bg-green-400 hover:cursor-pointer">Mint Asset</button>
         </div>
         :
-        <button onClick={connectWallet} className="border text-sm font-semibold rounded-lg duration-100 bg-slate-300 p-1 hover:bg-slate-400 hover:cursor-pointer">Connect Wallet</button>
+        <button onClick={connectWallet} className="border border-slate-500 px-2 text-sm font-semibold rounded-lg duration-100 bg-slate-300 hover:bg-slate-400 hover:cursor-pointer">Connect Wallet</button>
         }
       </div>
       <div className={`m-3 p-1 ${ nftAssets.length !==0 ? "grid grid-cols-2 md:grid-cols-4 gap-3" : "flex justify-center"}`}>

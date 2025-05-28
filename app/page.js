@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react";
 import contractAbi from "../utils/abi/RealAssetNFT.json";
-import { ethers, getBigInt } from "ethers";
+import { ethers } from "ethers";
 import Alert from "./Alert";
 
 // Change this to adjust the contract address that have been deployed before

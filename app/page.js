@@ -57,15 +57,19 @@ export default function Home() {
   const checkWalletConnection = async () => {
     if (!window.ethereum) return alert("Metamask has not installed");
 
-    const accounts = await window.ethereum.request({method: "eth_accounts"});
-    if (accounts.length !== 0) {
-      setCurrentAccount(ethers.getAddress(accounts[0]));
-      setIsWalletConnect(true);
-
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi.abi, signer);
-      setContract(nftContract);
+    try {
+      const accounts = await window.ethereum.request({method: "eth_accounts"});
+      if (accounts.length !== 0) {
+        setCurrentAccount(ethers.getAddress(accounts[0]));
+        setIsWalletConnect(true);
+  
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi.abi, signer);
+        setContract(nftContract);
+      }
+    } catch (err) {
+      console.error("Error:", err);
     }
 
   }
@@ -73,15 +77,19 @@ export default function Home() {
   const connectWallet = async () => {
     if (!window.ethereum) return alert("Metamask has not installed");
 
-    const accounts = await window.ethereum.request({method: "eth_requestAccounts"});
-    if (accounts.length !== 0) {
-      setCurrentAccount(ethers.getAddress(accounts[0]));
-      setIsWalletConnect(true);
-
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi.abi, signer);
-      setContract(nftContract);
+    try {
+      const accounts = await window.ethereum.request({method: "eth_requestAccounts"});
+      if (accounts.length !== 0) {
+        setCurrentAccount(ethers.getAddress(accounts[0]));
+        setIsWalletConnect(true);
+  
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi.abi, signer);
+        setContract(nftContract);
+      }
+    } catch (err) {
+      console.error("Error:", err);
     }
   }
 
@@ -110,20 +118,24 @@ export default function Home() {
       return
     }
 
-    const tx = await contract.mintAsset(dataAsset.name, dataAsset.description, ethers.parseEther(dataAsset.price.toString()))
-    await tx.wait();
-    openAlert("Asset minted!");
-    console.log("Asset minted!");
-    closeAlert();
-
-    await getAllAsset();
-
-    setDataAsset({
-      name: "",
-      description: "",
-      price: 0,
-    });
-    setIsMintModalOpen(false);
+    try {
+      const tx = await contract.mintAsset(dataAsset.name, dataAsset.description, ethers.parseEther(dataAsset.price.toString()))
+      await tx.wait();
+      openAlert("Asset minted!");
+      console.log("Asset minted!");
+      closeAlert();
+  
+      await getAllAsset();
+  
+      setDataAsset({
+        name: "",
+        description: "",
+        price: 0,
+      });
+      setIsMintModalOpen(false);
+    } catch (err) {
+      console.error("Error:", err);
+    }
   }
 
   const buyAsset = async (tokendId) => {
@@ -132,17 +144,21 @@ export default function Home() {
       return
     }
 
-    const asset = await contract.assets(tokendId);
-    const tx = await contract.buyAsset(tokendId, {
-      value: asset.price
-    });
-
-    await tx.wait();
-    openAlert("NFT bought successfully!");
-    console.log("NFT bought successfully!");
-    closeAlert();
-
-    await getAllAsset();
+    try {
+      const asset = await contract.assets(tokendId);
+      const tx = await contract.buyAsset(tokendId, {
+        value: asset.price
+      });
+  
+      await tx.wait();
+      openAlert("NFT bought successfully!");
+      console.log("NFT bought successfully!");
+      closeAlert();
+  
+      await getAllAsset();
+    } catch (err) {
+      console.error("Error:", err);
+    }
   }
 
   const checkData = (obj1, obj2) => {
@@ -198,15 +214,19 @@ export default function Home() {
       return
     }
     
-    const updated = await contract.updateListing(dataEdit.tokendId, dataEdit.name, dataEdit.description, ethers.parseEther(dataEdit.price.toString()), dataEdit.forSale);
-    console.log("Update successfully");
-    openAlert("Asset updated successfully!", "success");
-    closeAlert();
-
-    await updated.wait();
-
-    await getAllAsset();
-    closeModalEditHandler();
+    try {
+      const updated = await contract.updateListing(dataEdit.tokendId, dataEdit.name, dataEdit.description, ethers.parseEther(dataEdit.price.toString()), dataEdit.forSale);
+      console.log("Update successfully");
+      openAlert("Asset updated successfully!", "success");
+      closeAlert();
+  
+      await updated.wait();
+  
+      await getAllAsset();
+      closeModalEditHandler();
+    } catch (err) {
+      console.error("Error:", err);
+    }
   }
 
   const burnAsset = async (tokenId) => {
@@ -216,13 +236,17 @@ export default function Home() {
         return
       }
 
-      const burnt = await contract.burnAsset(tokenId);
-      openAlert("Asset burnt!", "success");
-      console.log("Asset burnt!");
-      closeAlert();
-
-      await burnt.wait();
-      await getAllAsset();
+      try {
+        const burnt = await contract.burnAsset(tokenId);
+        openAlert("Asset burnt!", "success");
+        console.log("Asset burnt!");
+        closeAlert();
+  
+        await burnt.wait();
+        await getAllAsset();
+      } catch (err) {
+        console.error("Error:", err);
+      }
     } 
   }
 
@@ -287,7 +311,7 @@ export default function Home() {
           }
           {
             !data.forSale && 
-            <div className="text-rose-500 w-min-2/3 w-max-[100px] px-2 border-2 z-20 text-2xl font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-45">Not For Sale</div>
+            <div className="text-rose-500 w-min-2/3 w-max-[100px] px-2 border-2 z-10 text-2xl font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-45">Not For Sale</div>
           }
           <h5 className="font-semibold text-xl">{data.name}</h5>
           <div className="text-sm my-1">
@@ -309,7 +333,7 @@ export default function Home() {
   const ModalMint = () => {
     return (
       <>
-        <div onClick={closeModalMintHandler} className="fixed flex justify-center items-center right-0 left-0 top-0 bottom-0 bg-[rgba(31,41,55,0.4)]">
+        <div onClick={closeModalMintHandler} className="fixed flex justify-center items-center z-20 right-0 left-0 top-0 bottom-0 bg-[rgba(31,41,55,0.4)]">
           <div onClick={(event) => event.stopPropagation()} className="fixed bg-white opacity-100 p-5 rounded-md">
             <h3 className="font-medium text-2xl">Mint Asset</h3>
             <button onClick={closeModalMintHandler} className="absolute border font-bold text-gray-600 rounded-md px-1.5 right-1.5 top-1.5 hover:cursor-pointer hover:text-gray-500">X</button>
@@ -342,7 +366,7 @@ export default function Home() {
   const ModalEdit = () => {
     return (
       <>
-        <div onClick={closeModalEditHandler} className="fixed flex justify-center items-center right-0 left-0 top-0 bottom-0 bg-[rgba(31,41,55,0.4)]">
+        <div onClick={closeModalEditHandler} className="fixed flex justify-center items-center z-20 right-0 left-0 top-0 bottom-0 bg-[rgba(31,41,55,0.4)]">
           <div onClick={(event) => event.stopPropagation()} className="fixed bg-white opacity-100 p-5 rounded-md">
             <h3 className="font-medium text-2xl">Edit Asset</h3>
             <button onClick={closeModalEditHandler} className="absolute border font-bold text-gray-600 rounded-md px-1.5 right-1.5 top-1.5 hover:cursor-pointer hover:text-gray-500">X</button>

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import contractAbi from "../utils/abi/RealAssetNFT.json";
 import { ethers } from "ethers";
 import Alert from "./Alert";
+import { Trash2, Pencil } from "lucide-react";
 
 // Change this to adjust the contract address that have been deployed before
 const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
@@ -301,34 +302,38 @@ export default function Home() {
   const Card = ({data}) => {
     return (
       <>
-        <div className="relative p-3 border border-slate-400 rounded-md wrap-break-word bg-slate-100 shadow-lg">
+        <div className="relative max-w-sm p-6 rounded-2xl shadow-xl bg-white border border-gray-200 space-y-4 wrap-break-word ">
           {
             data.seller === currentAccount &&
-            <div className="absolute text-xs top-2 right-2">
-              <button onClick={() => burnAsset(data.tokendId)} className="mr-1 underline text-red-600 hover:cursor-pointer hover:font-semibold hover:text-red-700">Burn</button>
-              <button onClick={() => openModalEditHandler(data)} className="underline hover:cursor-pointer hover:font-semibold hover:text-gray-600">Edit</button>
+            <div className="absolute top-3 right-3 flex space-x-2">
+              <button onClick={() => burnAsset(data.tokendId)} className="text-red-600 hover:text-red-800 flex items-center gap-1 text-sm hover:cursor-pointer">
+                <Trash2 className="w-4 h-4"/>Burn
+              </button>
+              <button onClick={() => openModalEditHandler(data)} className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm hover:cursor-pointer">
+                <Pencil className="w-4 h-4"/>Edit
+              </button>
             </div>
           }
           {
             !data.forSale && 
             <div className="text-rose-500 w-min-2/3 w-max-[100px] px-2 border-2 z-10 text-2xl font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-45">Not For Sale</div>
           }
-          <h5 className="font-bold text-xl">{data.name}</h5>
-          <div className="text-sm my-1">
-            <p className="font-medium">Description: </p>
-            <p className="text-xs">{data.description}</p>
+          <h2 className="font-bold text-2xl text-gray-800">{data.name}</h2>
+          <div className="space-y-1">
+            <p className="text-sm text-gray-500">Description: </p>
+            <p className="text-gray-700 font-medium">{data.description}</p>
           </div>
-          <div>
-            <p className="font-medium">Price: </p>
-            <p>{data.price} ETH</p>
+          <div className="space-y-1">
+            <p className="text-sm text-gray-500">Price: </p>
+            <p className="text-lg font-semibold text-green-600">{data.price} ETH</p>
           </div>
-          <div>
-            <p className="font-medium">Seller: </p>
-            <p>{data.seller}</p>
+          <div className="space-y-1 overflow-hidden">
+            <p className="text-sm text-gray-500">Seller: </p>
+            <p className="text-xs text-gray-700 break-words">{data.seller}</p>
           </div>
           { data.forSale && currentAccount !== null && data.seller !== currentAccount &&
             <div className="flex justify-center mt-2">
-              <button onClick={() => buyAsset(data.tokendId)} className="text-sm px-2 bg-amber-500 py-1 text-white shadow-md rounded-md hover:bg-amber-400 hover:cursor-pointer">Buy</button>
+              <button onClick={() => buyAsset(data.tokendId)} className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-0.5 hover:cursor-pointer">Buy Now</button>
             </div>
           }
         </div>

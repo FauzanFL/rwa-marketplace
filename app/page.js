@@ -6,7 +6,7 @@ import Alert from "./Alert";
 import { Trash2, Pencil } from "lucide-react";
 
 // Change this to adjust the contract address that have been deployed before
-const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
 export default function Home() {
   const [currentAccount, setCurrentAccount] = useState(null);
@@ -30,9 +30,8 @@ export default function Home() {
     try {
       let nftContract = null
       if (!contract) {
-        const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
-        const signer = await provider.getSigner();
-        nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi.abi, signer);
+        const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_SEPOLIA_RPC);
+        nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi.abi, provider);
       } else {
         nftContract = contract
       }
@@ -135,7 +134,13 @@ export default function Home() {
       });
       setIsMintModalOpen(false);
     } catch (err) {
-      console.error("Error:", err);
+      if (err.code === "ACTION_REJECTED") {
+        openAlert("Transaksi dibatalkan oleh pengguna!", "error");
+        console.warn("User rejected the transaction.");
+        closeAlert();
+      } else {
+        console.error("Error: ", err);
+      }
     }
   }
 
@@ -158,7 +163,13 @@ export default function Home() {
   
       await getAllAsset();
     } catch (err) {
-      console.error("Error:", err);
+      if (err.code === "ACTION_REJECTED") {
+        openAlert("Transaksi dibatalkan oleh pengguna!", "error");
+        console.warn("User rejected the transaction.");
+        closeAlert();
+      } else {
+        console.error("Error: ", err);
+      }
     }
   }
 
@@ -226,7 +237,13 @@ export default function Home() {
       await getAllAsset();
       closeModalEditHandler();
     } catch (err) {
-      console.error("Error:", err);
+      if (err.code === "ACTION_REJECTED") {
+        openAlert("Transaksi dibatalkan oleh pengguna!", "error");
+        console.warn("User rejected the transaction.");
+        closeAlert();
+      } else {
+        console.error("Error: ", err);
+      }
     }
   }
 
@@ -246,7 +263,13 @@ export default function Home() {
         await burnt.wait();
         await getAllAsset();
       } catch (err) {
-        console.error("Error:", err);
+        if (err.code === "ACTION_REJECTED") {
+          openAlert("Transaksi dibatalkan oleh pengguna!", "error");
+          console.warn("User rejected the transaction.");
+          closeAlert();
+        } else {
+          console.error("Error: ", err);
+        }
       }
     } 
   }

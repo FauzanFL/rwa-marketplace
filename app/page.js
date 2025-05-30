@@ -316,7 +316,7 @@ export default function Home() {
           }
           {
             !data.forSale && 
-            <div className="text-rose-500 w-min-2/3 w-max-[100px] px-2 border-2 z-10 text-2xl font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-45">Not For Sale</div>
+            <div className="text-rose-500 border-2 border-rose-500 px-4 py-1 text-2xl font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-45 z-10 whitespace-nowrap bg-white/80 rounded-md">Not For Sale</div>
           }
           <h2 className="font-bold text-2xl text-gray-800">{data.name}</h2>
           <div className="space-y-1">
